@@ -1,15 +1,8 @@
 const { Pool } = require('pg')
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'cal_clone',
-  password: null,
-  port: 5432,
-})
-
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err)
+  connectionString: 'postgresql://neondb_owner:npg_N3sg4YJQdixz@ep-shy-dust-a1dws3rm-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+  ssl: { rejectUnauthorized: false }
 })
 
 pool.query('SELECT NOW()', (err, res) => {
