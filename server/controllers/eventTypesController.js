@@ -1,6 +1,6 @@
 const pool = require('../db/connection')
 
-const USER_ID = 1 // default logged in user
+const USER_ID = 1
 
 exports.getAll = async (req, res) => {
   try {
@@ -15,11 +15,11 @@ exports.getAll = async (req, res) => {
 }
 
 exports.create = async (req, res) => {
-  const { title, slug, description, duration } = req.body
+  const { title, slug, description, duration, buffer_time } = req.body
   try {
     const result = await pool.query(
-      'INSERT INTO event_types (user_id, title, slug, description, duration) VALUES ($1,$2,$3,$4,$5) RETURNING *',
-      [USER_ID, title, slug, description, duration]
+      'INSERT INTO event_types (user_id, title, slug, description, duration, buffer_time) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
+      [USER_ID, title, slug, description, duration, buffer_time || 0]
     )
     res.status(201).json(result.rows[0])
   } catch (err) {
@@ -29,11 +29,11 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   const { id } = req.params
-  const { title, slug, description, duration } = req.body
+  const { title, slug, description, duration, buffer_time } = req.body
   try {
     const result = await pool.query(
-      'UPDATE event_types SET title=$1, slug=$2, description=$3, duration=$4 WHERE id=$5 AND user_id=$6 RETURNING *',
-      [title, slug, description, duration, id, USER_ID]
+      'UPDATE event_types SET title=$1, slug=$2, description=$3, duration=$4, buffer_time=$5 WHERE id=$6 AND user_id=$7 RETURNING *',
+      [title, slug, description, duration, buffer_time || 0, id, USER_ID]
     )
     res.json(result.rows[0])
   } catch (err) {

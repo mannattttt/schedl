@@ -1,5 +1,6 @@
 const pool = require('../db/connection')
 const USER_ID = 1
+const { sendBookingConfirmation, sendCancellationEmail } = require('../utils/emails')
 
 exports.getAll = async (req, res) => {
   try {
@@ -37,21 +38,20 @@ exports.getAvailableSlots = async (req, res) => {
       [event_type_id, date]
     )
 
+    const totalSlotTime = event.duration + (event.buffer_time || 0)
     const bookedTimes = bookingsResult.rows.map(b => new Date(b.start_time).toISOString())
-    const slots = []
-    const [startH, startM] = start_time.split(':').map(Number)
-    const [endH, endM] = end_time.split(':').map(Number)
 
+    const slots = []
     let current = new Date(`${date}T${start_time}`)
     const endLimit = new Date(`${date}T${end_time}`)
 
     while (current < endLimit) {
-      const slotEnd = new Date(current.getTime() + event.duration * 60000)
+      const slotEnd = new Date(current.getTime() + totalSlotTime * 60000)
       if (slotEnd <= endLimit) {
         const isBooked = bookedTimes.includes(current.toISOString())
         if (!isBooked) slots.push(current.toISOString())
       }
-      current = new Date(current.getTime() + event.duration * 60000)
+      current = new Date(current.getTime() + totalSlotTime * 60000)
     }
 
     res.json(slots)
@@ -79,6 +79,20 @@ exports.create = async (req, res) => {
       'INSERT INTO bookings (event_type_id, booker_name, booker_email, start_time, end_time) VALUES ($1,$2,$3,$4,$5) RETURNING *',
       [event_type_id, booker_name, booker_email, start_time, end_time]
     )
+    const booking = result.rows[0]
+
+    try {
+    await sendBookingConfirmation({
+        booker_name,
+        booker_email,
+        title: event.title,
+        start_time,
+        duration: event.duration,
+        host_email: process.env.EMAIL_USER
+    })
+} catch (err) {
+  console.error("Email failed:", err)
+}
     res.status(201).json(result.rows[0])
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -87,12 +101,33 @@ exports.create = async (req, res) => {
 
 exports.cancel = async (req, res) => {
   const { id } = req.params
+
   try {
+
+    const bookingResult = await pool.query(
+      `SELECT b.*, e.title 
+       FROM bookings b
+       JOIN event_types e ON b.event_type_id = e.id
+       WHERE b.id = $1`,
+      [id]
+    )
+
+    const booking = bookingResult.rows[0]
+
     const result = await pool.query(
       "UPDATE bookings SET status = 'cancelled' WHERE id = $1 RETURNING *",
       [id]
     )
+
+    await sendCancellationEmail({
+      booker_name: booking.booker_name,
+      booker_email: booking.booker_email,
+      title: booking.title,
+      start_time: booking.start_time
+    })
+
     res.json(result.rows[0])
+
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
