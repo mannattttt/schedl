@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from 'react-router-dom'
+
 
 const NAV_LINKS = ["Product", "Pricing", "Enterprise", "Blog"];
 
@@ -63,8 +64,20 @@ const TESTIMONIALS = [
 
 export default function Home() {
     const navigate = useNavigate()
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false)
+    const dropdownRef = useRef(null)
+
+    useEffect(() => {
+    const handleClickOutside = (e) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false)
+        }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);

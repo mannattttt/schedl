@@ -5,7 +5,7 @@ export default function Dashboard() {
   const [eventTypes, setEventTypes] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState({ title: '', slug: '', description: '', duration: 30 })
+  const [form, setForm] = useState({ title: '', slug: '', description: '', duration: 30, buffer_time: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { fetchEventTypes() }, [])
@@ -24,7 +24,7 @@ export default function Dashboard() {
 
   const openEdit = (et) => {
     setEditing(et)
-    setForm({ title: et.title, slug: et.slug, description: et.description, duration: et.duration })
+    setForm({ title: et.title, slug: et.slug, description: et.description, duration: et.duration, buffer_time: et.buffer_time || 0 })
     setShowModal(true)
   }
 
@@ -93,6 +93,7 @@ export default function Dashboard() {
               { label: 'Title', key: 'title', type: 'text', placeholder: '30 Minute Meeting' },
               { label: 'URL Slug', key: 'slug', type: 'text', placeholder: '30min' },
               { label: 'Duration (minutes)', key: 'duration', type: 'number', placeholder: '30' },
+              { label: 'Buffer Time (minutes)', key: 'buffer_time', type: 'number', placeholder: '0' },
             ].map(field => (
               <div key={field.key} style={{ marginBottom: 16 }}>
                 <label style={{ fontSize: 13, fontWeight: 600, color: '#333', display: 'block', marginBottom: 6 }}>{field.label}</label>

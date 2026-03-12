@@ -48,23 +48,30 @@ export default function BookingPage() {
   }
 
   const handleBook = async () => {
-    if (!form.name || !form.email) return alert('Please fill in all fields')
-    await createBooking({
-      event_type_id: eventType.id,
-      booker_name: form.name,
-      booker_email: form.email,
-      start_time: selectedSlot,
-    })
-    navigate('/confirmation', {
-      state: {
-        name: form.name,
-        email: form.email,
-        title: eventType.title,
-        duration: eventType.duration,
-        start_time: selectedSlot,
-      }
-    })
+  console.log("Button clicked")
+
+  if (!form.name || !form.email) {
+    alert('Please fill in all fields')
+    return
   }
+
+  await createBooking({
+    event_type_id: eventType.id,
+    booker_name: form.name,
+    booker_email: form.email,
+    start_time: selectedSlot,
+  })
+
+  navigate('/confirmation', {
+    state: {
+      name: form.name,
+      email: form.email,
+      title: eventType.title,
+      duration: eventType.duration,
+      start_time: selectedSlot,
+    }
+  })
+}
 
   // Calendar helpers
   const startOfMonth = currentMonth.startOf('month')
