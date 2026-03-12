@@ -8,14 +8,14 @@ const bookingsRouter = require('./routes/bookings')
 
 const app = express()
 
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://schedl.vercel.app']
-}))
+app.use(cors({ origin: '*' }))
 app.use(express.json())
 
 app.use('/api/event-types', eventTypesRouter)
 app.use('/api/availability', availabilityRouter)
 app.use('/api/bookings', bookingsRouter)
+
+app.get('/', (req, res) => res.send('Server is running!'))
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, '0.0.0.0', () => {
