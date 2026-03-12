@@ -46,7 +46,7 @@ export default function Dashboard() {
   }
 
   const copyLink = (slug) => {
-    navigator.clipboard.writeText(`http://localhost:5173/john/${slug}`)
+    navigator.clipboard.writeText(`https://schedl.vercel.app/john/${slug}`)
     alert('Link copied!')
   }
 
