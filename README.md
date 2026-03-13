@@ -20,7 +20,7 @@ https://github.com/mannattttt/schedl.git
 ### Backend
 - Node.js
 - Express.js
-- Nodemailer — email notifications
+- Resend — email notifications (via HTTP API)
 
 ### Database
 - PostgreSQL (NeonDB — cloud hosted)
@@ -63,7 +63,7 @@ cal-clone/
     │   ├── schema.sql
     │   └── seed.js
     └── utils/
-        └── email.js
+        └── emails.js
 ```
 
 ## Database Schema
@@ -108,11 +108,11 @@ npm run dev
 Frontend runs on `http://localhost:5173`
 
 ### 5. Email Setup (optional)
-Add these to `server/.env`:
+This project uses [Resend](https://resend.com) to send emails. Add your API key to `server/.env`:
 ```
-EMAIL_USER=mannatchaudhary1@gmail.com
-EMAIL_PASS=your-gmail-app-password
+RESEND_API_KEY=your-resend-api-key
 ```
+Note: On Resend's free plan, emails can only be sent to the address registered on your Resend account unless you verify a custom domain.
 
 ## Assumptions
 - A single default user (John Doe) is pre-logged in on the admin side — no authentication is required
@@ -120,4 +120,4 @@ EMAIL_PASS=your-gmail-app-password
 - Availability is set per day of the week (not per date)
 - All times are stored in UTC and displayed in Asia/Kolkata timezone
 - Buffer time is added after each meeting slot to prevent back-to-back bookings
-- Email notifications require a valid Gmail account with App Password enabled
+- Email notifications use Resend's HTTP API (not SMTP) to work reliably on cloud platforms like Railway
