@@ -1,5 +1,11 @@
 const nodemailer = require('nodemailer')
 
+// Node.js 17+ defaults to IPv6 first, but Railway does not support outbound IPv6.
+// This forces Node to use IPv4 for DNS lookups to fix the ENETUNREACH error.
+if (require('dns').setDefaultResultOrder) {
+  require('dns').setDefaultResultOrder('ipv4first')
+}
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
