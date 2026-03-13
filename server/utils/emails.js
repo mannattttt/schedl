@@ -1,30 +1,20 @@
-const nodemailer = require('nodemailer')
+const { Resend } = require('resend');
 
-// Node.js 17+ defaults to IPv6 first, but Railway does not support outbound IPv6.
-// This forces Node to use IPv4 for DNS lookups to fix the ENETUNREACH error.
-if (require('dns').setDefaultResultOrder) {
-  require('dns').setDefaultResultOrder('ipv4first')
-}
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  }
-})
+// Use a verified domain or Resend's default testing domain (onboarding@resend.dev)
+const SENDER_EMAIL = 'onboarding@resend.dev'; 
 
 exports.sendBookingConfirmation = async ({ booker_name, booker_email, title, start_time, duration, host_email }) => {
   const date = new Date(start_time).toLocaleString('en-IN', {
     weekday: 'long', year: 'numeric', month: 'long',
     day: 'numeric', hour: '2-digit', minute: '2-digit'
-  })
+  });
 
   // Email to booker
-  await transporter.sendMail({
-    from: `"Schedl" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: SENDER_EMAIL,
     to: booker_email,
     subject: `Booking Confirmed: ${title}`,
     html: `
@@ -40,11 +30,11 @@ exports.sendBookingConfirmation = async ({ booker_name, booker_email, title, sta
         <p style="margin-top: 24px; font-size: 13px; color: #aaa;">Powered by Schedl</p>
       </div>
     `
-  })
+  });
 
   // Email to host
-  await transporter.sendMail({
-    from: `"Schedl" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: SENDER_EMAIL,
     to: host_email,
     subject: `New Booking: ${title} with ${booker_name}`,
     html: `
@@ -59,17 +49,17 @@ exports.sendBookingConfirmation = async ({ booker_name, booker_email, title, sta
         <p style="margin-top: 24px; font-size: 13px; color: #aaa;">Powered by Schedl</p>
       </div>
     `
-  })
-}
+  });
+};
 
 exports.sendCancellationEmail = async ({ booker_name, booker_email, title, start_time }) => {
   const date = new Date(start_time).toLocaleString('en-IN', {
     weekday: 'long', year: 'numeric', month: 'long',
     day: 'numeric', hour: '2-digit', minute: '2-digit'
-  })
+  });
 
-  await transporter.sendMail({
-    from: `"Schedl" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: SENDER_EMAIL,
     to: booker_email,
     subject: `Booking Cancelled: ${title}`,
     html: `
@@ -84,5 +74,5 @@ exports.sendCancellationEmail = async ({ booker_name, booker_email, title, start
         <p style="margin-top: 24px; font-size: 13px; color: #aaa;">Powered by Schedl</p>
       </div>
     `
-  })
-}
+  });
+};
